@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>幻想郷ちびキャラバトル - Gensokyo Chibi Battle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&family=Bungee&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      overflow: hidden;
+      background-color: #1a0510;
+    }
+    .font-bungee {
+      font-family: 'Bungee', cursive;
+    }
+
+    /* 幻想郷風の背景 */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 20%, #2e081a 0%, #1a0510 100%);
+      z-index: -10;
+      overflow: hidden;
+    }
+    
+    /* 桜吹雪アニメーション */
+    .sakura-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -5;
+    }
+    .petal {
+      position: absolute;
+      background-color: #ffb7c5;
+      border-radius: 150% 0 150% 0;
+      opacity: 0.6;
+      animation: sakura-fall linear infinite;
+    }
+    @keyframes sakura-fall {
+      0% { transform: translateY(-10vh) translateX(0) rotate(0deg); }
+      100% { transform: translateY(110vh) translateX(100px) rotate(360deg); }
+    }
+
+    /* 巻物風メッセージウィンドウ */
+    .scroll-window {
+      background: linear-gradient(to right, #e2d1b1 0%, #fdf5e6 10%, #fdf5e6 90%, #e2d1b1 100%);
+      border-top: 4px solid #8b4513;
+      border-bottom: 4px solid #8b4513;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: relative;
+      border-radius: 4px;
+    }
+    .scroll-window::before, .scroll-window::after {
+      content: '';
+      position: absolute;
+      top: -15%;
+      width: 16px;
+      height: 130%;
+      background: #5d2e0c; /* 木材のような茶色 */
+      border-radius: 20px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+    .scroll-window::before { left: -8px; }
+    .scroll-window::after { right: -8px; }
+
+    /* お札（符）風ボタン */
+    .ofuda-button {
+      background-color: #fdf5e6; /* 和紙色 */
+      border: 3px solid #b22222; /* 鮮やかな赤 */
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      color: #b22222;
+      font-weight: 900;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    }
+    .ofuda-button::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid #b22222;
+      pointer-events: none;
+    }
+    .ofuda-button:active:not(:disabled) {
+      transform: scale(0.92) rotate(-1deg);
+      background-color: #f5deb3;
+    }
+
+    /* 夜空・紺色バージョンのお札ボタン */
+    .ofuda-button-navy {
+      background-color: #0c1445;
+      border: 3px solid #ffd700;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .ofuda-button-navy::before {
+      border: 1px solid #ffd700;
+    }
+
+    /* 魔法陣（ガチャ用） */
+    .magic-circle {
+      width: 300px;
+      height: 300px;
+      border: 6px double #ffd700;
+      border-radius: 50%;
+      position: relative;
+      animation: rotate-circle 12s linear infinite;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(255, 215, 0, 0.5);
+    }
+    @keyframes rotate-circle {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* WARNING演出 */
+    @keyframes warning-blink {
+      0%, 100% { background-color: rgba(255, 0, 0, 0.4); opacity: 1; }
+      50% { background-color: rgba(0, 0, 0, 0.8); opacity: 0.8; }
+    }
+    .warning-overlay {
+      animation: warning-blink 0.2s infinite;
+    }
+
+    /* UR出現時の多色フラッシュ */
+    @keyframes ur-flash {
+      0% { background-color: #ff0000; }
+      25% { background-color: #ffff00; }
+      50% { background-color: #ff00ff; }
+      75% { background-color: #00ffff; }
+      100% { background-color: #ff0000; }
+    }
+    .ur-flashing {
+      animation: ur-flash 0.1s infinite;
+    }
+
+    /* 弾幕風キラキラエフェクト */
+    @keyframes danmaku-spark {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+      100% { transform: scale(2.5) rotate(360deg); opacity: 0; }
+    }
+    .sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: white;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      animation: danmaku-spark 0.8s ease-out forwards;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px) rotate(-1deg); }
+      75% { transform: translateX(6px) rotate(1deg); }
+    }
+    .animate-shake {
+      animation: shake 0.2s ease-in-out infinite;
+    }
+    
+    @keyframes dark-flash {
+      0% { background-color: transparent; }
+      50% { background-color: #330000; }
+      100% { background-color: transparent; }
+    }
+    .animate-dark-flash {
+      animation: dark-flash 0.3s forwards;
+    }
+
+    @keyframes attack-right {
+      0% { transform: translate(0,0) scale(1); }
+      30% { transform: translate(60px, -20px) scale(1.2); }
+      100% { transform: translate(0,0) scale(1); }
+    }
+    .animate-attack-right {
+      animation: attack-right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes attack-left {
+      0% { transform: translate(0,0) scale(1); }
+      30% { transform: translate(-60px, 20px) scale(1.2); }
+      100% { transform: translate(0,0) scale(1); }
+    }
+    .animate-attack-left {
+      animation: attack-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+</head>
+<body class="text-white select-none">
+  <div id="root"></div>
+</body>
+</html>
